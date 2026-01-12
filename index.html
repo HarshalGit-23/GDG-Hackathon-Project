@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Community Help Finder</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h2>🌍 Community Help Finder</h2>
+
+  <button onclick="googleLogin()">Login with Google</button>
+
+  <h3>Add Help Request</h3>
+
+  <input type="text" id="name" placeholder="Your Name"><br><br>
+
+  <select id="helpType">
+    <option>Food</option>
+    <option>Tutoring</option>
+    <option>Medical</option>
+    <option>Other</option>
+  </select><br><br>
+
+  <textarea id="description" placeholder="Describe your need"></textarea><br><br>
+
+  <button onclick="addRequest()">Submit Request</button>
+
+  <h3>Nearby Help Requests</h3>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Firebase + App -->
+  <script type="module" src="app.js"></script>
+
+</body>
+</html>
