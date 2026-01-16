@@ -1,76 +1,121 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup }
-from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs }
-from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-/* 🔥 PASTE YOUR FIREBASE CONFIG HERE */
+/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "XXXX",
-  appId: "XXXX"
+  apiKey: "AIzaSyAsP9n4alDFMWyThC0yuFt7rYu6Mn56Jeo",
+  authDomain: "community-help-finder.firebaseapp.com",
+  projectId: "community-help-finder-c7dca"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-/* 🔐 GOOGLE LOGIN */
-window.googleLogin = function () {
-  signInWithPopup(auth, provider)
-    .then(result => {
-      alert("Welcome " + result.user.displayName);
-    })
-    .catch(error => console.log(error));
+/* UI TOGGLE */
+window.showNeedyForm = () => {
+  needyForm.classList.remove("hidden");
+  volunteerForm.classList.add("hidden");
 };
 
-/* ➕ ADD HELP REQUEST */
-window.addRequest = async function () {
-  const name = document.getElementById("name").value;
-  const helpType = document.getElementById("helpType").value;
-  const description = document.getElementById("description").value;
+window.showVolunteerForm = () => {
+  volunteerForm.classList.remove("hidden");
+  needyForm.classList.add("hidden");
+};
+
+/* GOOGLE MAP */
+let map;
+let markers = [];
+
+window.initMap = function () {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 20.5937, lng: 78.9629 },
+    zoom: 5
+  });
+
+  listenForRequests();
+};
+
+/* SUBMIT NEEDY REQUEST (CURRENT LOCATION) */
+window.submitNeedy = function () {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
 
   navigator.geolocation.getCurrentPosition(async position => {
-    await addDoc(collection(db, "helpRequests"), {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    const name = n_name.value;
+    const phone = n_phone.value;
+    const type = n_type.value;
+    const desc = n_desc.value;
+
+    if (!name || !phone || !desc) {
+      alert("Fill all fields");
+      return;
+    }
+
+    await addDoc(collection(db, "requests"), {
       name,
-      helpType,
-      description,
-      lat: position.coords.latitude,
-      lng: position.coords.longitude
+      phone,
+      type,
+      desc,
+      lat,
+      lng,
+      time: Date.now()
     });
 
-    alert("Help request submitted!");
-    loadRequests();
+    alert("Request submitted! Volunteers can see you on map.");
+    needyForm.classList.add("hidden");
+  }, () => {
+    alert("Location permission denied");
   });
 };
 
-/* 🗺️ MAP USING LEAFLET */
-let map;
+/* REGISTER VOLUNTEER */
+window.registerVolunteer = function () {
+  volunteerForm.classList.add("hidden");
+  alert("You are registered as volunteer. Live requests shown on map.");
 
-function initMap() {
-  map = L.map('map').setView([20.5937, 78.9629], 5);
+  google.maps.event.trigger(map, "resize");
+  map.setZoom(6);
+};
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-}
+/* REAL-TIME MAP UPDATE */
+function listenForRequests() {
+  onSnapshot(collection(db, "requests"), snapshot => {
+    markers.forEach(m => m.setMap(null));
+    markers = [];
 
-/* 📍 LOAD REQUESTS FROM FIRESTORE */
-async function loadRequests() {
-  const snapshot = await getDocs(collection(db, "helpRequests"));
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    L.marker([data.lat, data.lng])
-      .addTo(map)
-      .bindPopup(`<b>${data.helpType}</b><br>${data.description}`);
+    snapshot.forEach(doc => {
+      const d = doc.data();
+
+      const marker = new google.maps.Marker({
+        position: { lat: d.lat, lng: d.lng },
+        map
+      });
+
+      const info = new google.maps.InfoWindow({
+        content: `
+          <b>${d.type}</b><br>
+          ${d.name}<br>
+          ${d.phone}<br>
+          ${d.desc}
+        `
+      });
+
+      marker.addListener("click", () => {
+        info.open(map, marker);
+      });
+
+      markers.push(marker);
+    });
   });
 }
 
-window.onload = () => {
-  initMap();
-  loadRequests();
-};
