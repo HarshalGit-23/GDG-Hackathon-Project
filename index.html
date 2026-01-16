@@ -1,45 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Community Help Finder</title>
+  <meta charset="UTF-8" />
+  <title>Community Help Connect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
 
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"
-  />
+    .buttons button {
+      margin: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
 
-  <link rel="stylesheet" href="style.css">
+    .card {
+      width: 300px;
+      margin: 15px auto;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      margin: 6px 0;
+      padding: 6px;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+      margin-top: 20px;
+      border: 2px solid #ccc;
+    }
+  </style> 
 </head>
+
 <body>
 
-  <h2>🌍 Community Help Finder</h2>
+<h1>🌍 Community Help Connect</h1>
+<p>Connecting people in need with volunteers in real time</p>
 
-  <button onclick="googleLogin()">Login with Google</button>
+<div class="buttons">
+  <button onclick="showNeedyForm()">Register as User / Needy</button>
+  <button onclick="showVolunteerForm()">Register as Volunteer</button>
+</div>
 
-  <h3>Add Help Request</h3>
+<!-- Needy Form -->
+<div id="needyForm" class="card hidden">
+  <h2>Request Help</h2>
+  <input id="n_name" placeholder="Your Name">
+  <input id="n_phone" placeholder="Phone Number">
 
-  <input type="text" id="name" placeholder="Your Name"><br><br>
-
-  <select id="helpType">
+  <select id="n_type">
     <option>Food</option>
-    <option>Tutoring</option>
     <option>Medical</option>
+    <option>Shelter</option>
+    <option>Education</option>
     <option>Other</option>
-  </select><br><br>
+  </select>
 
-  <textarea id="description" placeholder="Describe your need"></textarea><br><br>
+  <textarea id="n_desc" placeholder="Describe your need"></textarea>
+  <button onclick="submitNeedy()">Submit Request</button>
+</div>
 
-  <button onclick="addRequest()">Submit Request</button>
+<!-- Volunteer Form -->
+<div id="volunteerForm" class="card hidden">
+  <h2>Volunteer Registration</h2>
+  <input id="v_name" placeholder="Your Name">
+  <input id="v_phone" placeholder="Phone Number">
+  <button onclick="registerVolunteer()">Register</button>
+</div>
 
-  <h3>Nearby Help Requests</h3>
-  <div id="map"></div>
+<h2>📍 Live Help Requests (Volunteer View)</h2>
+<div id="map"></div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- APP SCRIPT -->
+<script type="module" src="app.js"></script>
 
-  <!-- Firebase + App -->
-  <script type="module" src="app.js"></script>
+<!-- GOOGLE MAPS SCRIPT -->
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAsP9n4alDFMWyThC0yuFt7rYu6Mn56Jeo&callback=initMap"
+  async
+  defer>
+</script>
 
 </body>
 </html>
